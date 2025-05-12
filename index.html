@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ko">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Collapsible Sidebar Menu</title>
+		<link rel="stylesheet" href="style.css" />
+	</head>
+	<body>
+		<input type="checkbox" id="menu-toggle" class="menu-toggle" />
+		<label for="menu-toggle" class="menu-toggle-btn">&#9776;</label>
+
+		<div class="sidebar">
+			<a href="random_character.html">
+				<div class="menu-item">
+					<img class="icon" src="image/icon_1.png" alt="Icon 1" />
+					<span class="label">캐릭 뭐하지?</span>
+				</div>
+			</a>
+            <a href="random_ready.html">
+			<div class="menu-item">
+				<img class="icon" src="image/icon_2.png" alt="Icon 1" />
+				<span class="label">레디 뭐하지?</span>
+			</div>
+            </a>
+		</div>
+
+		<div class="main-content">
+			<h1>루멘 뭐하지?</h1>
+			<p>뭐하지??? 왼쪽 사이드 바에서 선택해주세요.</p>
+		</div>
+
+		<script src="sidebar_always_on.js"></script>
+	</body>
+</html>

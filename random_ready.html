@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ko">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>레디 뭐하지?</title>
+		<link rel="stylesheet" href="style.css" />
+	</head>
+	<body>
+		<input type="checkbox" id="menu-toggle" class="menu-toggle" />
+		<label for="menu-toggle" class="menu-toggle-btn">&#9776;</label>
+
+		<div class="sidebar">
+			<a href="random_character.html">
+				<div class="menu-item">
+					<img class="icon" src="image/icon_1.png" alt="Icon 1" />
+					<span class="label">캐릭 뭐하지?</span>
+				</div>
+			</a>
+            <a href="random_ready.html">
+			<div class="menu-item">
+				<img class="icon" src="image/icon_2.png" alt="Icon 1" />
+				<span class="label">레디 뭐하지?</span>
+			</div>
+            </a>
+		</div>
+
+		<div class="main-content">
+			<h1>레디 뭐하지?</h1>
+            <div class="list-container">
+                <table id="item-table" class="item-table">
+                    <thead>
+                        <tr>
+                            <th>픽</th>
+                            <th>기술명</th>
+                            <th>삭제</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+
+                <input type="text" id="item-input" class="item-input" placeholder="작성후 엔터로 추가" />
+            </div>
+            <button id="random-btn" class="random-btn">랜덤 카드 뽑기</button>
+		</div>
+
+        <script src="random_ready.js"></script>
+		<script src="sidebar_always_off.js"></script>
+	</body>
+</html>
