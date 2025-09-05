@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ko">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>캐릭 뭐하지? — 가챠 오프닝 (optimized)</title>
+		<style>
+			:root {
+				--bg: #0b0b0f;
+				--card: #11131a;
+				--white: #ffffff;
+			}
+			* {
+				box-sizing: border-box;
+			}
+			html,
+			body {
+				height: 100%;
+			}
+			body {
+				margin: 0;
+				background: #000;
+				color: #e5e7eb;
+				font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Apple SD Gothic Neo,
+					Noto Sans KR, "Apple Color Emoji", "Segoe UI Emoji";
+				overflow: hidden;
+			}
+
+			/* Sidebar (unchanged) */
+			.menu-toggle {
+				display: none;
+			}
+			.menu-toggle-btn {
+				position: fixed;
+				top: 14px;
+				left: 16px;
+				z-index: 30;
+				font-size: 28px;
+				cursor: pointer;
+				user-select: none;
+				color: #9ca3af;
+			}
+			.sidebar {
+				position: fixed;
+				left: 0;
+				top: 0;
+				bottom: 0;
+				width: 260px;
+				padding: 72px 16px 16px;
+				background: rgba(17, 19, 26, 0.7);
+				backdrop-filter: blur(10px);
+				border-right: 1px solid rgba(255, 255, 255, 0.06);
+				z-index: 20;
+				transform: translateX(-100%);
+				transition: transform 0.35s ease;
+			}
+			.menu-toggle:checked ~ .sidebar {
+				transform: translateX(0);
+			}
+			.menu-item {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				padding: 10px 12px;
+				border-radius: 14px;
+				color: #e5e7eb;
+				text-decoration: none;
+			}
+			.menu-item:hover {
+				background: rgba(255, 255, 255, 0.06);
+			}
+			.menu-item .icon {
+				width: 48px;
+				height: 48px;
+				margin-right: 10px;
+			}
+			.menu-item .label {
+				font-size: 16px;
+                white-space: nowrap;
+                overflow: hidden;
+                transition: opacity 0.3s ease;
+			}
+
+			/* Stage */
+			.stage {
+				position: relative;
+				display: grid;
+				place-items: center;
+				min-height: 100vh;
+				padding: 24px;
+			}
+
+			/* Ground shadow */
+			.ground-shadow {
+				position: absolute;
+				inset: auto 0 10vh 0;
+				height: 38px;
+				width: min(40vw, 420px);
+				margin: auto;
+				background: radial-gradient(50% 60% at 50% 50%, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0) 70%);
+				filter: blur(6px);
+				opacity: 0.85;
+				transition: opacity 0.35s ease;
+			}
+
+			/* Gacha card */
+			.card-wrap {
+				position: relative;
+				width: min(64vw, 420px);
+				aspect-ratio: 3/4;
+				perspective: 1200px;
+				cursor: pointer;
+				z-index: 10;
+				user-select: none;
+				-webkit-tap-highlight-color: transparent;
+			}
+			.hint {
+				position: absolute;
+				top: -56px;
+				left: 50%;
+				transform: translateX(-50%);
+				font-size: 14px;
+				opacity: 0.7;
+			}
+
+			.card {
+				position: absolute;
+				inset: 0;
+				background: linear-gradient(165deg, #151827, #0d0f16);
+				border-radius: 24px;
+				/* reflection stays via ::before; remove tilt entirely */
+				transform: none;
+				box-shadow: 0 28px 60px rgba(0, 0, 0, 0.65), inset 0 0 0 2px rgba(255, 255, 255, 0.06);
+				overflow: hidden;
+			}
+			.card::before {
+				content: "";
+				position: absolute;
+				inset: -20%;
+				background: conic-gradient(
+					from 0deg,
+					rgba(255, 255, 255, 0.06),
+					transparent 25%,
+					rgba(255, 255, 255, 0.08) 45%,
+					transparent 60%
+				);
+				animation: spin 8s linear infinite;
+				mix-blend-mode: screen;
+				pointer-events: none;
+			}
+			@keyframes spin {
+				to {
+					transform: rotate(1turn);
+				}
+			}
+
+			/* Removed: emblem title, inner circle, cracks, particles, hover tilt */
+
+			/* Flash over white */
+			.flash {
+				position: fixed;
+				inset: 0;
+				background: #fff;
+				opacity: 0;
+				pointer-events: none;
+				z-index: 40;
+			}
+			.flash.on {
+				animation: flashFade 1100ms ease forwards;
+			}
+			@keyframes flashFade {
+				0% {
+					opacity: 0;
+				}
+				10% {
+					opacity: 1;
+				}
+				100% {
+					opacity: 0;
+				}
+			}
+
+			/* Result image only */
+			.result-wrap {
+				position: fixed;
+				inset: 0;
+				display: grid;
+				place-items: center;
+				background: radial-gradient(1200px 600px at 50% 100%, rgba(255, 255, 255, 0.06), transparent 60%);
+				z-index: 5;
+				opacity: 0;
+				transform: scale(0.98);
+				transition: opacity 0.9s ease, transform 0.9s ease;
+			}
+			.revealed .result-wrap {
+				opacity: 1;
+				transform: scale(1);
+			}
+
+			.revealed .ground-shadow {
+				opacity: 0;
+			}
+			.revealed .card-wrap {
+				pointer-events: none;
+			}
+
+			.footer-tip {
+				position: fixed;
+				bottom: 16px;
+				left: 50%;
+				transform: translateX(-50%);
+				font-size: 12px;
+				opacity: 0.6;
+			}
+		</style>
+	</head>
+	<body>
+		<input type="checkbox" id="menu-toggle" class="menu-toggle" />
+		<label for="menu-toggle" class="menu-toggle-btn">&#9776;</label>
+		<div class="sidebar">
+			<a href="random_character.html">
+				<div class="menu-item">
+					<img class="icon" src="image/icon_1.png" alt="Icon 1" />
+					<span class="label">캐릭 뭐하지?</span>
+				</div>
+			</a>
+			<a href="random_character_anim.html">
+				<div class="menu-item">
+					<img class="icon" src="image/icon_3.png" alt="Icon 1" />
+					<span class="label">스킨 뭐하지?</span>
+				</div>
+			</a>
+			<a href="random_ready.html">
+				<div class="menu-item">
+					<img class="icon" src="image/icon_2.png" alt="Icon 1" />
+					<span class="label">레디 뭐하지?</span>
+				</div>
+			</a>
+		</div>
+
+		<main class="stage" id="stage">
+			<div class="ground-shadow"></div>
+
+			<div class="card-wrap" id="gacha">
+				<div class="hint" id="hint">카드를 탭해서 깨뜨리기 (4회)</div>
+				<div class="card" id="card">
+					<!-- emblem and text removed intentionally; reflection handled by ::before -->
+				</div>
+			</div>
+
+			<!-- Result area: image only -->
+			<div class="result-wrap" id="resultWrap" aria-hidden="true">
+				<img
+					id="resultImage"
+					alt="결과 카드"
+					style="
+						max-width: min(72vw, 640px);
+						max-height: 80vh;
+						border-radius: 22px;
+						box-shadow: 0 0 64px rgba(255, 255, 255, 1), 0 22px 60px rgba(0, 0, 0, 0.6),
+							inset 0 0 0 2px rgba(255, 255, 255, 0.06);
+					"
+				/>
+			</div>
+		</main>
+
+		<div class="flash" id="flash"></div>
+		<div class="footer-tip">다시 시도하려면 F5 / 새로고침</div>
+
+		<script src="random_character_anim.js"></script>
+	</body>
+</html>
