@@ -1,6 +1,3 @@
-// random_character_anim.js — reveal uses imageList only; hides gacha card; no text wrapper
-// Each tap increases card edge brightness strongly. Result card also gets max glow.
-
 const imageList = [
 	"image/skin_1.webp",
 	"image/skin_2.webp",
@@ -20,7 +17,6 @@ const imageList = [
 const wrap = document.getElementById("gacha");
 const card = document.getElementById("card");
 const hint = document.getElementById("hint");
-const particlesHost = document.getElementById("particles");
 const flash = document.getElementById("flash");
 const stage = document.getElementById("stage");
 const resultWrap = document.getElementById("resultWrap");
@@ -31,7 +27,6 @@ const tapNeeded = 4;
 let taps = 0,
 	revealed = false;
 
-// Stronger glow levels for each tap
 const glowLevels = [
 	"0 0 16px rgba(255,255,255,0.4)",
 	"0 0 28px rgba(255,255,255,0.6)",
@@ -39,9 +34,41 @@ const glowLevels = [
 	"0 0 64px rgba(255,255,255,1)",
 ];
 
-// Remove the text label from the unrevealed card
 const emblemTitle = card.querySelector(".title");
 if (emblemTitle) emblemTitle.remove();
+
+const chosenIndex = Math.floor(Math.random() * imageList.length);
+const chosenUrl = imageList[chosenIndex];
+let preloadReady = false;
+let preloadedImg = new Image();
+try {
+	const link = document.createElement("link");
+	link.rel = "preload";
+	link.as = "image";
+	link.href = chosenUrl;
+	document.head.appendChild(link);
+} catch (_) {}
+
+preloadedImg.decoding = "async";
+preloadedImg.loading = "eager";
+preloadedImg.src = chosenUrl;
+if (preloadedImg.decode) {
+	preloadedImg
+		.decode()
+		.then(() => {
+			preloadReady = true;
+		})
+		.catch(() => {
+			preloadReady = true;
+		});
+} else {
+	preloadedImg.onload = () => {
+		preloadReady = true;
+	};
+	preloadedImg.onerror = () => {
+		preloadReady = true;
+	};
+}
 
 wrap.addEventListener(
 	"click",
@@ -77,23 +104,31 @@ function reveal() {
 		if (wrap) wrap.style.display = "none";
 		if (groundShadow) groundShadow.style.display = "none";
 
-		const pickedUrl = rollResult();
 		while (resultWrap.firstChild) resultWrap.removeChild(resultWrap.firstChild);
 
-		const img = resultImagePre || document.createElement("img");
+		let img = resultImagePre || document.createElement("img");
 		img.id = "resultImage";
 		img.alt = "결과 카드";
-		img.src = pickedUrl;
+
+		if (preloadReady) {
+			if (preloadedImg && preloadedImg.complete) {
+				const clone = preloadedImg.cloneNode(false);
+				img = clone;
+				img.id = "resultImage";
+				img.alt = "결과 카드";
+			} else {
+				img.src = chosenUrl;
+			}
+		} else {
+			img.src = chosenUrl;
+		}
+
 		img.style.maxWidth = "min(72vw, 640px)";
 		img.style.maxHeight = "80vh";
 		img.style.borderRadius = "22px";
-		// Apply same max glow as final tap
-		img.style.boxShadow = `0 0 64px rgba(255,255,255,1), 0 22px 60px rgba(0,0,0,.6), inset 0 0 0 2px rgba(255,255,255,.06)`;
+		img.style.boxShadow =
+			"0 0 64px rgba(255,255,255,1), 0 22px 60px rgba(0,0,0,.6), inset 0 0 0 2px rgba(255,255,255,.06)";
+
 		resultWrap.appendChild(img);
 	}, 180);
-}
-
-function rollResult() {
-	const idx = Math.floor(Math.random() * imageList.length);
-	return imageList[idx];
 }
