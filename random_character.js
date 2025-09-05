@@ -14,6 +14,7 @@ const imageList = [
 		"image/char_10.webp",
 		"image/char_11.webp",
 		"image/char_12.webp",
+		"image/char_13.webp"
 	];
 
 // Preload images
